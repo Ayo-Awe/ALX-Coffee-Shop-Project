@@ -1,13 +1,14 @@
 import json
+from posixpath import split
 from flask import request, _request_ctx_stack
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
+AUTH0_DOMAIN = 'dev-r5yivtq1.us.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'dev'
+API_AUDIENCE = 'Coffee'
 
 ## AuthError Exception
 '''
@@ -31,7 +32,21 @@ class AuthError(Exception):
     return the token part of the header
 '''
 def get_token_auth_header():
-   raise Exception('Not Implemented')
+
+    if "Authorization" not in request.headers:
+        raise AuthError({"code":"No authorization headers", "description":"Authorization headers were not sent in the request"},400)
+
+    auth_header = request.headers["Authorization"]
+
+    split_header = auth_header.split(" ")
+
+    if len(split_header)!= 2 or split_header[0].lower() != "bearer" :
+        raise AuthError({"code":"", "description":"permissions not found in payload"},403)
+
+    token = split_header[1]
+    
+    return token
+
 
 '''
 @TODO implement check_permissions(permission, payload) method
@@ -45,7 +60,13 @@ def get_token_auth_header():
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+    if "permissions" not in payload:
+        raise AuthError({"code":"permissions not found", "description":"permissions not found in payload"},400)
+
+    if permission not in payload["permissions"]:
+        print(payload["permissions"])
+        raise AuthError({"code":"", "description":"permissions not found in payload"},403)
+    return True
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -61,7 +82,50 @@ def check_permissions(permission, payload):
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 def verify_decode_jwt(token):
-    raise Exception('Not Implemented')
+    token = get_token_auth_header()
+    jsonurl = urlopen("https://"+AUTH0_DOMAIN+"/.well-known/jwks.json")
+    jwks = json.loads(jsonurl.read())
+    unverified_header = jwt.get_unverified_header(token)
+    rsa_key = {}
+    for key in jwks["keys"]:
+        if key["kid"] == unverified_header["kid"]:
+            
+            rsa_key = {
+                "kty": key["kty"],
+                "kid": key["kid"],
+                "use": key["use"],
+                "n": key["n"],
+                "e": key["e"]
+            }
+    if rsa_key:
+        try:
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=ALGORITHMS,
+                audience=API_AUDIENCE,
+                issuer="https://"+AUTH0_DOMAIN+"/"
+            )
+        except jwt.ExpiredSignatureError:
+            raise AuthError({"code": "token_expired",
+                            "description": "token is expired"}, 401)
+        except jwt.JWTClaimsError:
+            raise AuthError({"code": "invalid_claims",
+                            "description":
+                                "incorrect claims,"
+                                "please check the audience and issuer"}, 401)
+        except Exception:
+            raise AuthError({"code": "invalid_header",
+                            "description":
+                                "Unable to parse authentication"
+                                " token."}, 401)
+
+        _request_ctx_stack.top.current_user = payload
+
+        return payload
+
+    raise AuthError({"code": "invalid_header",
+                    "description": "Unable to find appropriate key"}, 401)
 
 '''
 @TODO implement @requires_auth(permission) decorator method
