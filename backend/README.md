@@ -14,6 +14,20 @@ We recommend working within a virtual environment whenever using Python for proj
 
 #### PIP Dependencies
 
+You can use pipenv to manage your virtual environment and dependecies, to use pipenv navigate to the `/backend` directory and run:
+
+```bash
+pip install pipenv
+```
+
+Then run the following command to intialise the virtual environment and install your dependencies
+
+```bash
+pipenv install
+```
+
+Alternatively:
+
 Once you have your virtual environment setup and running, install dependencies by naviging to the `/backend` directory and running:
 
 ```bash
