@@ -4,8 +4,10 @@
 
 ### Installing Dependencies
 
-#### Python 3.7
+#### Python 3.8
 
+This project requires python version 3.8 or later to run.
+Note earlier versions of python will run into errors
 Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
 
 #### Virtual Environment
@@ -14,7 +16,7 @@ We recommend working within a virtual environment whenever using Python for proj
 
 #### PIP Dependencies
 
-You can use pipenv to manage your virtual environment and dependecies, to use pipenv navigate to the `/backend` directory and run:
+You can use pipenv to manage your virtual environment and dependecies. To use pipenv, navigate to the `/backend` directory and run:
 
 ```bash
 pip install pipenv
@@ -26,9 +28,15 @@ Then run the following command to intialise the virtual environment and install 
 pipenv install
 ```
 
+then,
+
+```bash
+pipenv shell
+```
+
 Alternatively:
 
-Once you have your virtual environment setup and running, install dependencies by naviging to the `/backend` directory and running:
+Once you have your virtual environment setup and running, install dependencies by navigating to the `/backend` directory and running:
 
 ```bash
 pip install -r requirements.txt
@@ -46,9 +54,7 @@ This will install all of the required packages we selected within the `requireme
 
 ## Running the server
 
-From within the `./src` directory first ensure you are working using your created virtual environment.
-
-Each time you open a new terminal session, run:
+From within the `./src` directory run:
 
 ```bash
 export FLASK_APP=api.py;
